@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "kalloc.c"
 
 struct {
   struct spinlock lock;
@@ -531,4 +532,31 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+//Displays the number of available pages in the system
+//This part was written by Wesley (11/17)
+int
+getNumFreePages()
+{
+   int count = 0;
+
+   //Get the lock
+   if(kmem.use_lock)
+      acquire(&kmem.lock);
+
+   //Start of the free pages
+   struct run *page = kmem->freelist;
+
+   //Loop through the list of free memory, count the free pages
+   while(run) {
+      count++;
+      run = runt->next;
+   }
+
+   //Release the lock
+   if(kmem.use_lock)
+      release(&kmem.lock);
+
+   return count;
 }
