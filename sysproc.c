@@ -89,3 +89,10 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//The following function was added by AJ on November 17th
+int
+sys_getNumFreePages(void)
+{
+  return getNumFreePages();
+}

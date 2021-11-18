@@ -120,7 +120,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-
+int             getNumFreePages(void); //Added by AJ on the 17th of November
 // swtch.S
 void            swtch(struct context**, struct context*);
 
