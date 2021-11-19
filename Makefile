@@ -1,3 +1,5 @@
+#Line 185 was added by AJ on November 17th
+
 OBJS = \
 	bio.o\
 	console.o\
@@ -181,7 +183,7 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-  _getNumFreePages\ #Added by AJ on November 17th
+  _getNumFreePages\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -250,8 +252,8 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
-	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c getNumFreePages.c\
+	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c getNumFreePages.c\
+	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 

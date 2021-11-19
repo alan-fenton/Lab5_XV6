@@ -1,11 +1,11 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "fctnl.h"
+#include "fcntl.h"
 
 int
 main(int argc, char *argv[])
 {
-  printf("%d",getNumFreeCells());
+  printf(1, "%d\n",getNumFreePages());
   exit();
 }
