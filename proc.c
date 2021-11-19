@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "kmem.h"
 
 struct {
   struct spinlock lock;
@@ -545,7 +546,7 @@ getNumFreePages()
       acquire(&kmem.lock);
 
    //Start of the free pages
-   struct run *page = kmem->freelist;
+   struct run *page = kmem.freelist;
 
    //Loop through the list of free memory, count the free pages
    while(page) {
