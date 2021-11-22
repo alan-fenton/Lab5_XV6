@@ -6,6 +6,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "elf.h"
+#include "spinlock.h"
 #include "kmem.h"
 
 extern char data[];  // defined by kernel.ld
