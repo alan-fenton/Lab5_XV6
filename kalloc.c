@@ -51,6 +51,10 @@ freerange(void *vstart, void *vend)
 void
 kfree(char *v)
 {
+  if(((struct run *)v)->count > 1){ //This if brought to you by the letters AJ
+    decCount((struct run *)v);
+    return;
+  }
   struct run *r;
 
   if((uint)v % PGSIZE || v < end || V2P(v) >= PHYSTOP)
@@ -79,8 +83,10 @@ kalloc(void)
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = kmem.freelist;
-  if(r)
+  if(r){
     kmem.freelist = r->next;
+    r.count=1; //Brought to you by the letters AJ
+  }
   if(kmem.use_lock)
     release(&kmem.lock);
   return (char*)r;
