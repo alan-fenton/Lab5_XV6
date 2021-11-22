@@ -6,6 +6,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "elf.h"
+#include "kmem.h"
 
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
@@ -341,6 +342,57 @@ copyuvm(pde_t *pgdir, uint sz)
 
     //Copy parent memory
     memmove(mem, (char*)P2V(pa), PGSIZE);
+
+    //Map the pages to the child process, fail if it doesn't work
+    if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
+      kfree(mem);
+      goto bad;
+    }
+  }
+
+  //Return the page directory of the child?
+  return d;
+
+//Something went wrong, undo changes and return an error value
+bad:
+  freevm(d);
+  return 0;
+}
+
+// Given a parent process's page table, make the child point to the same table,
+// and change both to only have write permissions
+pde_t*
+copyuvm_cow(pde_t *pgdir, uint sz)
+{
+  pde_t *d;
+  pte_t *pte;
+  uint pa, i, flags;
+  char *mem;
+
+  //Still map the kernel to the child
+  if((d = setupkvm()) == 0)
+    return 0;
+
+  //Go through each page in the directory
+  for(i = 0; i < sz; i += PGSIZE){
+    //Error handling
+    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+      panic("copyuvm: pte should exist");
+    if(!(*pte & PTE_P))
+      panic("copyuvm: page not present");
+
+    //Copy address and flag things?
+    pa = PTE_ADDR(*pte);
+    flags = PTE_FLAGS(*pte);
+
+    //Clear the write
+    flags &= ~PTE_W;
+
+    //Make mem point to the parent page
+    mem = (char*)P2V(pa);
+
+    //Increment the count field of the page
+    pageRefIncCount((struct run*) mem);
 
     //Map the pages to the child process, fail if it doesn't work
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
