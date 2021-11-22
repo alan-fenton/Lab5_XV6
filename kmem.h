@@ -13,17 +13,5 @@ struct {
   int use_lock;
   struct run *freelist;
 } kmem;
-
-//AJ made this function
-void decCount (struct run * r){
-  acquire(&(r->lock));
-  r->count--;
-  release(&(r->lock));
-};
-
-//AJ made this function too
-void incCount (struct run * r){
-  acquire(&(r->lock));
-  r->count++;
-  release(&(r->lock));
-};
+void pageRefDecCount (struct run * r);
+void pageRefIncCount (struct run * r);

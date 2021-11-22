@@ -52,7 +52,7 @@ void
 kfree(char *v)
 {
   if(((struct run *)v)->count > 1){ //This if brought to you by the letters AJ
-    decCount((struct run *)v);
+    pageRefDecCount((struct run *)v);
     return;
   }
   struct run *r;
@@ -85,10 +85,22 @@ kalloc(void)
   r = kmem.freelist;
   if(r){
     kmem.freelist = r->next;
-    r.count=1; //Brought to you by the letters AJ
+    r->count=1; //Brought to you by the letters AJ
   }
   if(kmem.use_lock)
     release(&kmem.lock);
   return (char*)r;
 }
+
+void pageRefIncCount (struct run * r){
+  acquire(&(r->lock));
+  r->count++;
+  release(&(r->lock));
+}
+
+void pageRefDecCount (struct run * r){
+  acquire(&(r->lock));
+  r->count--;
+  release(&(r->lock));
+};
 
