@@ -5,7 +5,6 @@
 #include "mmu.h"
 #include "x86.h"
 #include "proc.h"
-#include "spinlock.h"
 #include "kmem.h"
 
 struct {

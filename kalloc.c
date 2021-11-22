@@ -7,7 +7,6 @@
 #include "param.h"
 #include "memlayout.h"
 #include "mmu.h"
-#include "spinlock.h"
 #include "kmem.h"
 
 
@@ -52,7 +51,9 @@ void
 kfree(char *v)
 {
   if(((struct run *)v)->count > 1){ //This if brought to you by the letters AJ
+    cprintf("test 0: %d\n", ((struct run *)v)->count);
     pageRefDecCount((struct run *)v);
+    cprintf("test 0.5\n");
     return;
   }
   struct run *r;
@@ -93,6 +94,7 @@ kalloc(void)
 }
 
 void pageRefIncCount (struct run * r){
+  cprintf("test1\n");
   acquire(&(r->lock));
   r->count++;
   release(&(r->lock));
@@ -102,5 +104,5 @@ void pageRefDecCount (struct run * r){
   acquire(&(r->lock));
   r->count--;
   release(&(r->lock));
-};
+}
 

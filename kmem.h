@@ -1,4 +1,5 @@
 //Wesley created file
+#include "spinlock.h"
 
 //These structures have been moved here from kalloc.c so that proc.c can also
 //access them.
