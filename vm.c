@@ -322,23 +322,37 @@ copyuvm(pde_t *pgdir, uint sz)
 
   if((d = setupkvm()) == 0)
     return 0;
+
+  //Go through each page in the directory
   for(i = 0; i < sz; i += PGSIZE){
+    //Error handling
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
       panic("copyuvm: page not present");
+
+    //Copy address and flag things?
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
+
+    //Actually allocate the memory
     if((mem = kalloc()) == 0)
       goto bad;
+
+    //Copy parent memory
     memmove(mem, (char*)P2V(pa), PGSIZE);
+
+    //Map the pages to the child process, fail if it doesn't work
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
       goto bad;
     }
   }
+
+  //Return the page directory of the child?
   return d;
 
+//Something went wrong, undo changes and return an error value
 bad:
   freevm(d);
   return 0;
