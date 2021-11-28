@@ -455,7 +455,7 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
-//This handles the page fault. Written by Wesley
+//This handles the page fault. Written by Wesley and AJ
 void handle_pgflt()
 {
    //Read the faulting address
