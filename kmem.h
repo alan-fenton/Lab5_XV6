@@ -13,6 +13,8 @@ struct {
   struct spinlock lock;
   int use_lock;
   struct run *freelist;
+  struct run *multiref;
 } kmem;
+
 void pageRefDecCount (struct run * r);
 void pageRefIncCount (struct run * r);
