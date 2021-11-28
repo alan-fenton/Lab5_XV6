@@ -46,6 +46,13 @@ trap(struct trapframe *tf)
     return;
   }
 
+  //pgfault time
+  if(tf->trapno == T_PGFLT) {
+      proc->tf = tf;
+      handle_pgflt();
+      return;
+  }
+
   switch(tf->trapno){
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){

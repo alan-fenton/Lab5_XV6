@@ -402,6 +402,9 @@ copyuvm_cow(pde_t *pgdir, uint sz)
     }
   }
 
+  //Flush the TLB
+  lcr3(V2P(pgdir));
+
   //Return the page directory of the child?
   return d;
 
