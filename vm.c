@@ -456,40 +456,50 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 }
 
 //This handles the page fault. Written by Wesley
-void handle_pgflt()
+void handle_pgflt(void)
 {
-   //Read the faulting address
-   uint addr = rcr2();
+  uint flags;
+  char *mem;
+  int count;
+  //Read the faulting address
+  uint addr = rcr2();
+  //Get the actual address of the page from the page table
+  pte_t *faultpage = walkpgdir(myproc()->pgdir, (const void *) addr, 0);
 
-   //Get the actual address of the page from the page table
-   pte_t *faultpage = walkpgdir(myproc()->pgdir, (const void *) addr, 0);
+  //Make sure it's legal
+  if(!faultpage) {
+     cprintf("Process wrote oustside of bounds\n");
+     myproc()->killed = 1;
+     return;
+  }
 
-   //Make sure it's legal
-   if(!faultpage) {
-      cprintf("Process wrote oustside of bounds\n");
-      myproc()->killed = 1;
-      return;
-   }
-
-   //If the page has more than one reference, decrement, give the current
-   //process a writeable copy, flush the tlb
-   int count = getPageRefCount((void *) faultpage);
-   if(count > 1) {
-      pageRefDecCount((struct run*)faultpage);
-
+  //If the page has more than one reference, decrement, give the current
+  //process a writeable copy, flush the tlb
+  count = getPageRefCount((void *) faultpage);
+  if(count > 1) {
       //Actually allocate the memory
-      char *mem;
       if((mem = kalloc()) == 0)
-        goto bad;
-
+        goto realbad;
       //Copy parent memory
-   }
-
-   //If the page has only one reference, make it writeable, flush the tlb
-   if(count == 1) {
+      memmove(mem, (char*)faultpage, PGSIZE);
+      flags = PTE_FLAGS(*faultpage);
       flags &= PTE_W;
-      lcr3(V2P(pgdir));
-   }
+      if(mappages( myproc()->pgdir, (void *)faultpage, PGSIZE, V2P(mem), flags) < 0) {
+        kfree(mem);
+        goto realbad;
+      }
+      lcr3(V2P(myproc()->pgdir));
+      pageRefDecCount((struct run*)faultpage);
+  }
+  //If the page has only one reference, make it writeable, flush the tlb
+  if(count == 1) {
+      flags &= PTE_W;
+      lcr3(V2P(myproc()->pgdir));
+  }
+  return;
+realbad:
+  cprintf("We've reached OOFTOWN, population, you!\n");
+  freevm(myproc()->pgdir); 
 }
 
 //PAGEBREAK!
