@@ -6,5 +6,11 @@
 int
 main(int argc, char *argv[])
 {
-  while(1);
+  printf(1, "%d\n", getNumFreePages());
+
+   if(!fork())
+      printf(1, "%d\n", getNumFreePages());
+   else
+      wait();
+   exit();
 }

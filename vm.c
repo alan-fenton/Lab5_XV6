@@ -362,7 +362,7 @@ bad:
 
 // Given a parent process's page table, make the child point to the same table,
 // and change both to only have write permissions
-/*pde_t*
+pde_t*
 copyuvm_cow(pde_t *pgdir, uint sz)
 {
   pde_t *d;
@@ -409,7 +409,7 @@ copyuvm_cow(pde_t *pgdir, uint sz)
 bad:
   freevm(d);
   return 0;
-}*/
+}
 
 //PAGEBREAK!
 // Map user virtual address to kernel address.
