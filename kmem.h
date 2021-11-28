@@ -16,3 +16,4 @@ struct {
 } kmem;
 void pageRefDecCount (struct run * r);
 void pageRefIncCount (struct run * r);
+int getPageRefCount (void * page);

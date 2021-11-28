@@ -108,3 +108,6 @@ void pageRefDecCount (struct run * r){
     release(&kmem.lock);
 };
 
+int getPageRefCount (void * page){
+  return kmem.pg_refcount[(((uint) page)-PHYSTOP)/PGSIZE];
+};
