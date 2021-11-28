@@ -14,6 +14,12 @@ void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
                    // defined by the kernel linker script in kernel.ld
 
+//Prototypes for multiref helper functions
+//Added by Wesley
+void addMultiref(struct run *r);
+int deleteMultiref(struct run *r);
+int findMultiref(struct run *r);
+
 // Initialization happens in two phases.
 // 1. main() calls kinit1() while still using entrypgdir to place just
 // the pages mapped by entrypgdir on free list.
