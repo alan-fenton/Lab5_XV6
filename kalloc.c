@@ -50,16 +50,17 @@ freerange(void *vstart, void *vend)
 void
 kfree(char *v)
 {
-  if(((struct run *)v)->count > 1){ //This if brought to you by the letters AJ
+  struct run *r;
+
+  if((uint)v % PGSIZE || v < end || V2P(v) >= PHYSTOP)
+    panic("kfree");
+
+  if(findMultiref((struct run *)v)){ //This if brought to you by the letters AJ
     cprintf("test 0: %d\n", ((struct run *)v)->count);
     pageRefDecCount((struct run *)v);
     cprintf("test 0.5\n");
     return;
   }
-  struct run *r;
-
-  if((uint)v % PGSIZE || v < end || V2P(v) >= PHYSTOP)
-    panic("kfree");
 
   // Fill with junk to catch dangling refs.
   memset(v, 1, PGSIZE);
@@ -94,15 +95,91 @@ kalloc(void)
 }
 
 void pageRefIncCount (struct run * r){
-  cprintf("test1\n");
   acquire(&(r->lock));
+
+   //Add r to the multiref list if it is not there
+   if(!findMultiref(r)) {
+      addMultiref(r);
+   }
+
   r->count++;
+
   release(&(r->lock));
 }
 
 void pageRefDecCount (struct run * r){
+  cprintf("\n%d\n", r->lock.locked);
   acquire(&(r->lock));
   r->count--;
+
+  //Remove it from the list if the count is reduced to 1
+  if(r->count == 1)
+     deleteMultiref(r);
+
   release(&(r->lock));
+}
+
+//These functions were written by Wesley
+
+//This adds the given run instance to the multiref list in kmem
+void addMultiref(struct run *r) {
+   if(kmem.use_lock)
+      acquire(&kmem.lock);
+
+   r->next = kmem.multiref;
+   kmem.multiref = r;
+
+   if(kmem.use_lock)
+      release(&kmem.lock);
+}
+
+//This deletes a given run instance from the multiref list in kmem
+//Return 1 if the node was deleted, 0 if it was not found
+int deleteMultiref(struct run *r) {
+   if(kmem.use_lock)
+      acquire(&kmem.lock);
+
+
+   //Special case for it being the head of the list
+   if(kmem.multiref == r) {
+      kmem.multiref = r->next;
+      if(kmem.use_lock)
+         release(&kmem.lock);
+      return 1;
+   }
+
+   //Loop until we find the predecessor to the target
+   struct run *walker = kmem.multiref;
+   while(walker->next) {
+      //We found it, remove it and return
+      if(walker->next == r) {
+         walker->next = walker->next->next;
+         if(kmem.use_lock)
+            release(&kmem.lock);
+         return 1;
+      }
+      walker = walker->next;
+   }
+
+   //Never found it, return 0
+   if(kmem.use_lock)
+      release(&kmem.lock);
+   return 0;
+}
+
+//This checks to see if the node is in the list
+//Return 1 if the node was found, 0 otherwise
+int findMultiref(struct run *r) {
+   struct run *walker = kmem.multiref;
+
+   //Loop through until we find the target
+   while(walker) {
+      if(walker == r)
+         return 1;
+
+      walker = walker->next;
+   }
+
+   return 0;
 }
 

@@ -292,10 +292,13 @@ freevm(pde_t *pgdir)
   for(i = 0; i < NPDENTRIES; i++){
     if(pgdir[i] & PTE_P){
       char * v = P2V(PTE_ADDR(pgdir[i]));
+      ((struct run *)v)->count = 1;
       kfree(v);
     }
   }
+      cprintf("freevm test1\n");
   kfree((char*)pgdir);
+      cprintf("freevm test2\n");
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible
