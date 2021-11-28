@@ -62,9 +62,7 @@ kfree(char *v)
     panic("kfree");
 
   if(findMultiref((struct run *)v)){ //This if brought to you by the letters AJ
-    cprintf("test 0: %d\n", ((struct run *)v)->count);
     pageRefDecCount((struct run *)v);
-    cprintf("test 0.5\n");
     return;
   }
 

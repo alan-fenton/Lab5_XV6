@@ -296,9 +296,7 @@ freevm(pde_t *pgdir)
       kfree(v);
     }
   }
-      cprintf("freevm test1\n");
   kfree((char*)pgdir);
-      cprintf("freevm test2\n");
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible
