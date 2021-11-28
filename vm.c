@@ -455,6 +455,43 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
+//This handles the page fault. Written by Wesley
+void handle_pgflt()
+{
+   //Read the faulting address
+   uint addr = rcr2();
+
+   //Get the actual address of the page from the page table
+   pte_t *faultpage = walkpgdir(myproc()->pgdir, (const void *) addr, 0);
+
+   //Make sure it's legal
+   if(!faultpage) {
+      cprintf("Process wrote oustside of bounds\n");
+      myproc()->killed = 1;
+      return;
+   }
+
+   //If the page has more than one reference, decrement, give the current
+   //process a writeable copy, flush the tlb
+   int count = getPageRefCount((void *) faultpage);
+   if(count > 1) {
+      pageRefDecCount((struct run*)faultpage);
+
+      //Actually allocate the memory
+      char *mem;
+      if((mem = kalloc()) == 0)
+        goto bad;
+
+      //Copy parent memory
+   }
+
+   //If the page has only one reference, make it writeable, flush the tlb
+   if(count == 1) {
+      flags &= PTE_W;
+      lcr3(V2P(pgdir));
+   }
+}
+
 //PAGEBREAK!
 // Blank page.
 //PAGEBREAK!

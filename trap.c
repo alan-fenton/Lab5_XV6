@@ -48,7 +48,7 @@ trap(struct trapframe *tf)
 
   //pgfault time
   if(tf->trapno == T_PGFLT) {
-      proc->tf = tf;
+      myproc()->tf = tf;
       handle_pgflt();
       return;
   }
