@@ -93,14 +93,18 @@ kalloc(void)
 }
 
 void pageRefIncCount (struct run * r){
-  acquire(&(r->lock));
-  r->count++;
-  release(&(r->lock));
+  if(kmem.use_lock)
+    acquire(&kmem.lock);
+  kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]++;
+  if(kmem.use_lock)
+    release(&kmem.lock);
 }
 
 void pageRefDecCount (struct run * r){
-  acquire(&(r->lock));
-  r->count--;
-  release(&(r->lock));
+  if(kmem.use_lock)
+    acquire(&kmem.lock);
+  kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]--;
+  if(kmem.use_lock)
+    release(&kmem.lock);
 };
 

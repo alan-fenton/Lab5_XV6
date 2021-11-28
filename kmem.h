@@ -4,7 +4,6 @@
 //access them.
 struct run {
   struct run *next;
-  struct spinlock lock;
   int count;
 };
 
@@ -12,6 +11,8 @@ struct {
   struct spinlock lock;
   int use_lock;
   struct run *freelist;
+  uint freepages;
+  uint pg_refcount[PHYSTOP/PGSIZE];
 } kmem;
 void pageRefDecCount (struct run * r);
 void pageRefIncCount (struct run * r);
