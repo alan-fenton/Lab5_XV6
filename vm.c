@@ -401,7 +401,7 @@ copyuvm_cow(pde_t *pgdir, uint sz)
       goto bad;
     }
   }
-
+  lcr3(V2P(pgdir));
   //Return the page directory of the child?
   return d;
 
