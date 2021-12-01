@@ -93,21 +93,40 @@ kalloc(void)
 }
 
 void pageRefIncCount (struct run * r){
+  //Make sure it's physical memory
+  if((uint)r > PHYSTOP)
+    r = (struct run*)V2P(r);
+
   if(kmem.use_lock)
     acquire(&kmem.lock);
-  kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]++;
+    cprintf("%x has been incremented: index = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE);
+    //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]++;
+    //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]++;
+    kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]++;
   if(kmem.use_lock)
     release(&kmem.lock);
 }
 
 void pageRefDecCount (struct run * r){
+  //Make sure it's physical memory
+  if((uint)r > PHYSTOP)
+    r = (struct run*)V2P(r);
+
   if(kmem.use_lock)
     acquire(&kmem.lock);
-  kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]--;
+    cprintf("%x has been decremented: index = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE);
+    //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]--;
+    //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]--;
+    kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]--;
   if(kmem.use_lock)
     release(&kmem.lock);
 };
 
 int getPageRefCount (void * page){
-  return kmem.pg_refcount[(((uint) page)-PHYSTOP)/PGSIZE];
+  //Make sure it's physical memory
+  if((uint)page > PHYSTOP)
+    page = (void*)V2P(page);
+
+    cprintf("%x has been accessed: index = %d\n", page, (PHYSTOP-((uint) page))/PGSIZE);
+  return kmem.pg_refcount[(PHYSTOP-((uint) page))/PGSIZE];
 };

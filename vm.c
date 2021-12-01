@@ -393,7 +393,7 @@ copyuvm_cow(pde_t *pgdir, uint sz)
     mem = (char*)P2V(pa);
 
     //Increment the count field of the page
-    pageRefIncCount((struct run*) mem);
+    pageRefIncCount((struct run*) V2P(mem));
 
     //Map the pages to the child process, fail if it doesn't work
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
@@ -458,11 +458,13 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //This handles the page fault. Written by Wesley and AJ
 void handle_pgflt()
 {
-  uint flags;
+  uint pa, flags;
   char *mem;
   int count;
+
   //Read the faulting address
-  uint addr = rcr2();
+  uint addr = (uint)(P2V(rcr2()));
+
   //Get the actual address of the page from the page table
   pte_t *faultpage = walkpgdir(myproc()->pgdir, (const void *) addr, 0);
 
@@ -475,22 +477,41 @@ void handle_pgflt()
 
   //If the page has more than one reference, decrement, give the current
   //process a writeable copy, flush the tlb
-  count = getPageRefCount((void *) faultpage);
+  count = getPageRefCount((void *) V2P(faultpage));
+      //cprintf("%d out of %d\n", (((uint) V2P(faultpage))-EXTMEM)/PGSIZE, PHYSTOP/PGSIZE);
+      //cprintf("%d\n", count);
+      cprintf("%x has faulted: count = %d\n", V2P(faultpage), count);
+      cprintf("%x\n", PHYSTOP);
+      cprintf("%d\n", (PTE_FLAGS(*faultpage) | PTE_W) == PTE_FLAGS(*faultpage));
   if(count > 1) {
+cprintf("test\n");
       //Actually allocate the memory
       if((mem = kalloc()) == 0)
         goto realbad;
-      //Copy parent memory
-      memmove(mem, (char*)faultpage, PGSIZE);
+
+      //Copy the flags and then set it to be writeable
       flags = PTE_FLAGS(*faultpage);
-      flags &= PTE_W;
-      if(mappages( myproc()->pgdir, (void *)faultpage, PGSIZE, V2P(mem), flags) < 0) {
+      flags |= PTE_W;
+
+      //Get the physical address
+      pa = PTE_ADDR(*faultpage);
+
+      //Copy parent memory
+      memmove(mem, (char*)P2V(pa), PGSIZE);
+
+      //Map the pages
+      if(mappages( myproc()->pgdir, faultpage, PGSIZE, V2P(mem), flags) < 0) {
         kfree(mem);
         goto realbad;
       }
+
+      //Flush and decrement
       lcr3(V2P(myproc()->pgdir));
-      pageRefDecCount((struct run*)faultpage);
+      cprintf("about to dec\n");
+      pageRefDecCount((struct run*)V2P(faultpage));
+      cprintf("just dec'd\n");
   }
+
   //If the page has only one reference, make it writeable, flush the tlb
   if(count == 1) {
       flags &= PTE_W;
