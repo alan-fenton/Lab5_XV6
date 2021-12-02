@@ -509,7 +509,7 @@ cprintf("test\n");
 
   //If the page has only one reference, make it writeable, flush the tlb
   if(count == 1) {
-      flags &= PTE_W;
+      flags |= PTE_W;
       lcr3(V2P(curproc->pgdir));
   }
   return;
