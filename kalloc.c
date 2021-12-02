@@ -85,7 +85,7 @@ kalloc(void)
   r = kmem.freelist;
   if(r){
     kmem.freelist = r->next;
-    kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE] = 1; //Brought to you by the letters AJ
+    kmem.pg_refcount[(PHYSTOP-((uint) V2P(r)))/PGSIZE] = 1; //Brought to you by the letters AJ
 //cprintf("%x has been kalloc'd\n", V2P(r));
   }
   if(kmem.use_lock)

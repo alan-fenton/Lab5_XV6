@@ -368,7 +368,6 @@ copyuvm_cow(pde_t *pgdir, uint sz)
   pde_t *d;
   pte_t *pte;
   uint pa, i, flags;
-  char *mem;
 
   //Still map the kernel to the child
   if((d = setupkvm()) == 0)
@@ -389,16 +388,12 @@ copyuvm_cow(pde_t *pgdir, uint sz)
     //Clear the write
     flags &= ~PTE_W;
 
-    //Make mem point to the parent page
-    mem = (char*)P2V(pa);
-
     //Increment the count field of the page
-cprintf("in copy it's %x\n", pa);
     pageRefIncCount((struct run*) pa);
 
     //Map the pages to the child process, fail if it doesn't work
-    if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
-      kfree(mem);
+    if(mappages(d, (void*)i, PGSIZE, pa, flags) < 0) {
+      kfree((char*)pa);
       goto bad;
     }
   }
