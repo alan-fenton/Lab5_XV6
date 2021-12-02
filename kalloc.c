@@ -70,6 +70,7 @@ cprintf("free test\n");
     acquire(&kmem.lock);
   r = (struct run*)v;
   r->next = kmem.freelist;
+  kmem.pg_refcount[(PHYSTOP-((uint) V2P(r)))/PGSIZE] = 0;
   kmem.freelist = r;
   if(kmem.use_lock)
     release(&kmem.lock);
