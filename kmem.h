@@ -4,7 +4,6 @@
 //access them.
 struct run {
   struct run *next;
-  int count;
 };
 
 struct {

@@ -51,7 +51,7 @@ freerange(void *vstart, void *vend)
 void
 kfree(char *v)
 {
-  if(((struct run *)v)->count > 1){ //This if brought to you by the letters AJ
+  if(getPageRefCount((void*)v) > 1){ //This if brought to you by the letters AJ
     pageRefDecCount((struct run *)v);
     return;
   }
@@ -85,7 +85,8 @@ kalloc(void)
   r = kmem.freelist;
   if(r){
     kmem.freelist = r->next;
-    r->count=1; //Brought to you by the letters AJ
+    kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE] = 1; //Brought to you by the letters AJ
+//cprintf("%x has been kalloc'd\n", V2P(r));
   }
   if(kmem.use_lock)
     release(&kmem.lock);
@@ -99,7 +100,7 @@ void pageRefIncCount (struct run * r){
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-    cprintf("%x has been incremented: index = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE);
+    cprintf("%x has been incremented: index = %d, count = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE, kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]);
     //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]++;
     //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]++;
     kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]++;
@@ -114,7 +115,7 @@ void pageRefDecCount (struct run * r){
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-    cprintf("%x has been decremented: index = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE);
+    cprintf("%x has been decremented: index = %d, count = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE, kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]);
     //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]--;
     //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]--;
     kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]--;
@@ -127,6 +128,5 @@ int getPageRefCount (void * page){
   if((uint)page > PHYSTOP)
     page = (void*)V2P(page);
 
-    cprintf("%x has been accessed: index = %d\n", page, (PHYSTOP-((uint) page))/PGSIZE);
   return kmem.pg_refcount[(PHYSTOP-((uint) page))/PGSIZE];
 };
