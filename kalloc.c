@@ -103,10 +103,10 @@ void pageRefIncCount (struct run * r){
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-    cprintf("%x has been incremented: index = %d, count = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE, kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]);
-    //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]++;
-    //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]++;
-    kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]++;
+  cprintf("%x has been incremented: index = %d, count = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE, kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]);
+  //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]++;
+  //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]++;
+  kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]++;
   if(kmem.use_lock)
     release(&kmem.lock);
 }
@@ -118,10 +118,10 @@ void pageRefDecCount (struct run * r){
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
-    cprintf("%x has been decremented: index = %d, count = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE, kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]);
-    //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]--;
-    //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]--;
-    kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]--;
+  cprintf("%x has been decremented: index = %d, count = %d\n", r, (PHYSTOP-((uint) r))/PGSIZE, kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]);
+  //kmem.pg_refcount[(((uint) r)-EXTMEM)/PGSIZE]--;
+  //kmem.pg_refcount[(((uint) r)-PHYSTOP)/PGSIZE]--;
+  kmem.pg_refcount[(PHYSTOP-((uint) r))/PGSIZE]--;
   if(kmem.use_lock)
     release(&kmem.lock);
 };
