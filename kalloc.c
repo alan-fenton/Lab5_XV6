@@ -55,6 +55,7 @@ kfree(char *v)
 {
   if(getPageRefCount((void*)v) > 1){ //This if brought to you by the letters AJ
     pageRefDecCount((struct run *)v);
+cprintf("free test\n");
     return;
   }
   struct run *r;

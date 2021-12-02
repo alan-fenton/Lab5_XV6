@@ -460,7 +460,8 @@ void handle_pgflt()
   struct proc *curproc = myproc();
 
   //Read the faulting address
-  uint addr = (uint)(P2V(rcr2()));
+  uint addr = (uint)rcr2();
+  addr = (uint)PGROUNDDOWN(addr);
 
   //Get the actual address of the page from the page table
   pte_t *faultpage = walkpgdir(curproc->pgdir, (void *) addr, 0);
@@ -475,9 +476,12 @@ void handle_pgflt()
   //If the page has more than one reference, decrement, give the current
   //process a writeable copy, flush the tlb
   count = getPageRefCount((void *) V2P(faultpage));
-      cprintf("%x has faulted: count = %d\n", V2P(faultpage), count);
+
+      cprintf("The faulting address is %x\n", addr);
+      cprintf("%x has faulted: count = %d\n", faultpage, count);
       cprintf("%x\n", PHYSTOP);
       cprintf("%d\n", (PTE_FLAGS(*faultpage) | PTE_W) == PTE_FLAGS(*faultpage));
+
   if(count > 1) {
 cprintf("test\n");
       //Actually allocate the memory
@@ -509,7 +513,10 @@ cprintf("test\n");
 
   //If the page has only one reference, make it writeable, flush the tlb
   if(count == 1) {
-      flags &= PTE_W;
+      flags = PTE_FLAGS(*faultpage);
+      flags |= PTE_W;
+      pa = PTE_ADDR(*faultpage);
+      *faultpage = pa | flags | PTE_P;
       lcr3(V2P(curproc->pgdir));
   }
   return;
