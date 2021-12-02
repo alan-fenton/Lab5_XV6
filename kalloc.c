@@ -40,8 +40,10 @@ freerange(void *vstart, void *vend)
 {
   char *p;
   p = (char*)PGROUNDUP((uint)vstart);
-  for(; p + PGSIZE <= (char*)vend; p += PGSIZE)
+  for(; p + PGSIZE <= (char*)vend; p += PGSIZE){
+    kmem.pg_refcount[V2P(p)/PGSIZE]=0;
     kfree(p);
+  }
 }
 //PAGEBREAK: 21
 // Free the page of physical memory pointed at by v,
