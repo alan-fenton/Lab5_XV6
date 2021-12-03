@@ -477,7 +477,7 @@ void handle_pgflt()
   //process a writeable copy, flush the tlb
   count = getPageRefCount((void *) V2P(faultpage));
 
-      cprintf("The faulting address is %x\n", addr);
+      cprintf("The faulting address is %xin process %x\n", addr, curproc->pid);
       cprintf("%x has faulted: count = %d\n", faultpage, count);
       cprintf("%x\n", PHYSTOP);
       cprintf("%d\n", (PTE_FLAGS(*faultpage) | PTE_W) == PTE_FLAGS(*faultpage));
