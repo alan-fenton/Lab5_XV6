@@ -1,0 +1,25 @@
+ESTIMATE of time to complete: 20 hours
+
+Date        Start Time  Time Spent  Lab Part       Work Completed
+11/17/2021  6:13        45          1              Worked on getting the number of pages
+11/19/2021  3:43        40          1              Worked all of the kinks out of getNumFreePages
+11/22/2021  11:14       2:45        2              Worked on the reference count implementation
+11/28/2021  11:04       4:30        2-4            Finished parts 2 and 3, working on the page fault handler
+11/30/2021  9:45        1:30        4              Trying to figure out the page fault handler
+12/2/2021   1:30        3:30        4              This page fault handler is just not working
+12/3/2021   6:30                    5              Just gonna write what would be a good testcow if it worked and be done
+----------------------------------------------------------------------------------------------
+                                                   Total Time: 13 hours 40 minutes
+
+One of the first large problems we ran into in this lab was getting the pages to
+store the correct number of references, as we had run structures where the count
+field had garbage data. At first, we tried to add a linked list of
+multireferenced pages in the kmem structure, but we were still running into
+problems with garbage data messing with the count detection.
+In the end, we ended up putting an array of reference counts in the kmem 
+structure, using the physical addresses of the pages to index them. We then
+ran into a problem in the page fault handler, but were unfortunately unable to 
+completely figure it out, or even get it to a point where the OS reliably boots.
+We've left the code in and the current version uses our copyuvm_cow and page
+fault handler. If you want to test our function for part 1, you should be able
+to just change the copyuvm_cow call in fork (proc.c) to the standard copyuvm_cow.
